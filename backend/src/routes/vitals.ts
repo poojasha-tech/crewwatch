@@ -92,13 +92,15 @@ router.post('/:id/readings', async (req: Request, res: Response) => {
 
     const readingId = rows[0]?.id;
     if (readingId !== undefined) {
+      // Pass null for fields not submitted — anomaly detector skips nulls.
+      // Using ?? null (not ?? 0) so a missing field never triggers a false zero-value alert.
       const vitalsPayload: VitalsPayload = {
-        heart_rate:       heart_rate        ?? 0,
-        systolic_bp:      systolic_bp       ?? 0,
-        diastolic_bp:     diastolic_bp      ?? 0,
-        spo2:             spo2              ?? 0,
-        body_temp:        body_temp         ?? 0,
-        respiration_rate: respiration_rate  ?? 0,
+        heart_rate:       heart_rate        ?? null,
+        systolic_bp:      systolic_bp       ?? null,
+        diastolic_bp:     diastolic_bp      ?? null,
+        spo2:             spo2              ?? null,
+        body_temp:        body_temp         ?? null,
+        respiration_rate: respiration_rate  ?? null,
         radiation_dose:   null,
         sleep_hours:      sleep_hours       ?? null,
         mood:             mood              ?? null,

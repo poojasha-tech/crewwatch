@@ -38,12 +38,12 @@ function spread(r: { min: number; max: number }): number {
 const anomalyState: Record<number, { type: string; step: number } | null> = {};
 
 export type VitalsPayload = {
-  heart_rate: number;
-  systolic_bp: number;
-  diastolic_bp: number;
-  spo2: number;
-  body_temp: number;
-  respiration_rate: number;
+  heart_rate: number | null;
+  systolic_bp: number | null;
+  diastolic_bp: number | null;
+  spo2: number | null;
+  body_temp: number | null;
+  respiration_rate: number | null;
   radiation_dose: number | null;
   sleep_hours: number | null;
   mood: number | null;
