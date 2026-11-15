@@ -14,10 +14,13 @@ router.get('/', async (_req: Request, res: Response) => {
       role: string;
       environment: string;
       mission: string;
+      risk_score: number;
+      risk_level: string;
       alert_count: string;
     }>(`
       SELECT
         c.id, c.name, c.age, c.role, c.environment, c.mission,
+        c.risk_score, c.risk_level,
         COUNT(a.id) AS alert_count
       FROM crew c
       LEFT JOIN alerts a ON a.crew_id = c.id AND a.resolved_at IS NULL

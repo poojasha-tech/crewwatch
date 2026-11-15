@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrewWatch — Real-Time Health Monitor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Top bar ───────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-icon">✦</span>
+      <span class="brand-name">CrewWatch</span>
+      <span class="brand-sub">NASA Space Apps 2026</span>
+    </div>
+    <div class="topbar-status">
+      <span id="ws-dot" class="ws-dot disconnected"></span>
+      <span id="ws-label" class="ws-label">Connecting…</span>
+      <span class="topbar-divider">|</span>
+      <span id="crew-count" class="topbar-meta">— crew members</span>
+      <span class="topbar-divider">|</span>
+      <span id="last-update" class="topbar-meta">No data yet</span>
+    </div>
+  </header>
+
+  <!-- ── Main layout ───────────────────────────────────────────── -->
+  <div class="layout">
+
+    <!-- Sidebar: crew list -->
+    <aside class="sidebar">
+      <h2 class="sidebar-heading">Crew</h2>
+      <ul id="crew-list" class="crew-list">
+        <!-- Populated by dashboard.js -->
+        <li class="crew-item skeleton"></li>
+        <li class="crew-item skeleton"></li>
+        <li class="crew-item skeleton"></li>
+      </ul>
+    </aside>
+
+    <!-- Main panel: selected crew member -->
+    <main class="main-panel">
+
+      <!-- Empty state shown before a crew member is selected -->
+      <div id="empty-state" class="empty-state">
+        <div class="empty-icon">✦</div>
+        <p>Select a crew member to view their health data.</p>
+      </div>
+
+      <!-- Crew detail — hidden until selection -->
+      <div id="crew-detail" class="crew-detail hidden">
+
+        <!-- Section 1: Header -->
+        <div class="detail-header">
+          <div class="detail-identity">
+            <h1 id="detail-name" class="detail-name">—</h1>
+            <span id="detail-role" class="detail-role">—</span>
+            <span id="detail-env" class="env-badge">—</span>
+          </div>
+          <div class="detail-risk">
+            <div id="risk-gauge" class="risk-gauge green">
+              <span id="risk-score" class="risk-score">0</span>
+              <span class="risk-label">Risk Score</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Vitals cards -->
+        <section class="vitals-section">
+          <h2 class="section-heading">Current Vitals</h2>
+          <div class="vitals-grid">
+
+            <div class="vital-card" id="card-heart_rate">
+              <span class="vital-icon">♥</span>
+              <span class="vital-value" id="val-heart_rate">—</span>
+              <span class="vital-unit">bpm</span>
+              <span class="vital-label">Heart Rate</span>
+            </div>
+
+            <div class="vital-card" id="card-spo2">
+              <span class="vital-icon">◉</span>
+              <span class="vital-value" id="val-spo2">—</span>
+              <span class="vital-unit">%</span>
+              <span class="vital-label">SpO₂</span>
+            </div>
+
+            <div class="vital-card" id="card-bp">
+              <span class="vital-icon">⬡</span>
+              <span class="vital-value" id="val-bp">—</span>
+              <span class="vital-unit">mmHg</span>
+              <span class="vital-label">Blood Pressure</span>
+            </div>
+
+            <div class="vital-card" id="card-body_temp">
+              <span class="vital-icon">◈</span>
+              <span class="vital-value" id="val-body_temp">—</span>
+              <span class="vital-unit">°C</span>
+              <span class="vital-label">Body Temp</span>
+            </div>
+
+            <div class="vital-card" id="card-respiration_rate">
+              <span class="vital-icon">≋</span>
+              <span class="vital-value" id="val-respiration_rate">—</span>
+              <span class="vital-unit">br/min</span>
+              <span class="vital-label">Respiration</span>
+            </div>
+
+            <div class="vital-card" id="card-radiation_dose">
+              <span class="vital-icon">⚡</span>
+              <span class="vital-value" id="val-radiation_dose">—</span>
+              <span class="vital-unit">mSv</span>
+              <span class="vital-label">Radiation</span>
+            </div>
+
+            <div class="vital-card" id="card-sleep_hours">
+              <span class="vital-icon">◑</span>
+              <span class="vital-value" id="val-sleep_hours">—</span>
+              <span class="vital-unit">hrs</span>
+              <span class="vital-label">Sleep</span>
+            </div>
+
+            <div class="vital-card" id="card-mood">
+              <span class="vital-icon">☺</span>
+              <span class="vital-value" id="val-mood">—</span>
+              <span class="vital-unit">/ 5</span>
+              <span class="vital-label">Mood</span>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Section 3: Charts -->
+        <section class="charts-section">
+          <h2 class="section-heading">Trends <span class="section-sub">Last 20 readings</span></h2>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Heart Rate (bpm)</div>
+              <canvas id="chart-heart_rate"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">SpO₂ (%)</div>
+              <canvas id="chart-spo2"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Systolic BP (mmHg)</div>
+              <canvas id="chart-systolic_bp"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Body Temp (°C)</div>
+              <canvas id="chart-body_temp"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4: Active alerts -->
+        <section class="alerts-section">
+          <h2 class="section-heading">
+            Active Alerts
+            <span id="alert-count-badge" class="alert-count-badge hidden">0</span>
+          </h2>
+          <div id="no-alerts" class="no-alerts">
+            <span class="no-alerts-icon">✓</span>
+            All vitals within normal range.
+          </div>
+          <ul id="alert-list" class="alert-list">
+            <!-- Populated by dashboard.js -->
+          </ul>
+        </section>
+
+        <!-- Section 5: Self-assessment form -->
+        <section class="form-section">
+          <h2 class="section-heading">Log a Reading <span class="section-sub">Manual entry</span></h2>
+          <form id="reading-form" class="reading-form" autocomplete="off">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="f-heart_rate">Heart Rate (bpm)</label>
+                <input type="number" id="f-heart_rate" name="heart_rate" placeholder="e.g. 72" min="20" max="250" />
+              </div>
+              <div class="form-group">
+                <label for="f-spo2">SpO₂ (%)</label>
+                <input type="number" id="f-spo2" name="spo2" placeholder="e.g. 98" min="50" max="100" />
+              </div>
+              <div class="form-group">
+                <label for="f-systolic_bp">Systolic BP (mmHg)</label>
+                <input type="number" id="f-systolic_bp" name="systolic_bp" placeholder="e.g. 120" min="50" max="250" />
+              </div>
+              <div class="form-group">
+                <label for="f-diastolic_bp">Diastolic BP (mmHg)</label>
+                <input type="number" id="f-diastolic_bp" name="diastolic_bp" placeholder="e.g. 80" min="30" max="150" />
+              </div>
+              <div class="form-group">
+                <label for="f-body_temp">Body Temp (°C)</label>
+                <input type="number" id="f-body_temp" name="body_temp" placeholder="e.g. 36.6" step="0.1" min="30" max="45" />
+              </div>
+              <div class="form-group">
+                <label for="f-respiration_rate">Respiration Rate (br/min)</label>
+                <input type="number" id="f-respiration_rate" name="respiration_rate" placeholder="e.g. 16" min="5" max="60" />
+              </div>
+              <div class="form-group">
+                <label for="f-sleep_hours">Sleep Last Night (hrs)</label>
+                <input type="number" id="f-sleep_hours" name="sleep_hours" placeholder="e.g. 7" step="0.5" min="0" max="24" />
+              </div>
+              <div class="form-group">
+                <label for="f-mood">Mood (1 = very bad, 5 = very good)</label>
+                <select id="f-mood" name="mood">
+                  <option value="">— not reporting —</option>
+                  <option value="1">1 — Very bad</option>
+                  <option value="2">2 — Bad</option>
+                  <option value="3">3 — Okay</option>
+                  <option value="4">4 — Good</option>
+                  <option value="5">5 — Very good</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-footer">
+              <button type="submit" class="btn-submit">Submit Reading</button>
+              <span id="form-feedback" class="form-feedback"></span>
+            </div>
+          </form>
+        </section>
+
+      </div><!-- /crew-detail -->
+    </main>
+  </div><!-- /layout -->
+
+  <!-- Chart.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

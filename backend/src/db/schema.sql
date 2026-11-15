@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS crew (
   role        VARCHAR(100),
   environment VARCHAR(20) NOT NULL DEFAULT 'space', -- 'space' | 'village' | 'disaster'
   mission     VARCHAR(100),
+  risk_score  INT NOT NULL DEFAULT 0,               -- 0–100, updated after every pipeline run
+  risk_level  VARCHAR(10) NOT NULL DEFAULT 'green', -- 'green' | 'yellow' | 'red'
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
