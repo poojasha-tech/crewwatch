@@ -197,30 +197,6 @@ The simulator generates realistic vitals with Gaussian noise and injects anomali
 
 ---
 
-## Project Status
-
-**Backend (complete)**
-- [x] Docker + PostgreSQL infrastructure — single `docker compose up --build`
-- [x] Database schema — crew, vitals_readings, baselines, alerts tables
-- [x] Data simulator — Gaussian noise + anomaly injection, 5-second interval
-- [x] REST API — 5 endpoints covering full CRUD for vitals and alerts
-- [x] Personal baseline engine — Welford's algorithm, 9 vitals tracked
-- [x] Anomaly detector — z-score with 3 severity levels + alert deduplication
-- [x] Trend detector — least-squares slope on 20-reading window per vital
-- [x] Risk score calculator — composite 0–100 written to crew table
-- [x] WebSocket server — shares port 3000 with HTTP, broadcasts on every reading
-- [x] First aid guidance — plain-English message + step-by-step guidance per alert type
-
-**Frontend (complete)**
-- [x] Live dashboard — dark-themed, two-column layout
-- [x] Real-time vitals cards — 8 vitals, update on every WebSocket event
-- [x] Live trend charts — 4 Chart.js line graphs, 60-point rolling window
-- [x] Alert display — severity badges, message, and full guidance text
-- [x] Manual reading form — astronaut or health worker logs their own readings
-- [x] Auto-reconnect — WebSocket reconnects automatically if connection drops
-
----
-
 ## Author
 
 Pooja Sharma — [github.com/poojasha-tech](https://github.com/poojasha-tech)
