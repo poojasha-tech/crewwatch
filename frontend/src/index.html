@@ -15,6 +15,17 @@
       <span class="brand-name">CrewWatch</span>
       <span class="brand-sub">NASA Space Apps 2026</span>
     </div>
+
+    <div class="topbar-controls">
+      <button id="symptom-btn" class="btn-topbar">Check Symptoms</button>
+      <div class="mode-switcher" id="mode-switcher">
+        <button class="mode-btn active" data-mode="auto">Auto</button>
+        <button class="mode-btn" data-mode="disaster">Disaster</button>
+      </div>
+      <button id="simple-toggle" class="btn-topbar">Simple View</button>
+      <span id="offline-badge" class="offline-badge hidden">● OFFLINE</span>
+    </div>
+
     <div class="topbar-status">
       <span id="ws-dot" class="ws-dot disconnected"></span>
       <span id="ws-label" class="ws-label">Connecting…</span>
@@ -28,27 +39,22 @@
   <!-- ── Main layout ───────────────────────────────────────────── -->
   <div class="layout">
 
-    <!-- Sidebar: crew list -->
     <aside class="sidebar">
       <h2 class="sidebar-heading">Crew</h2>
       <ul id="crew-list" class="crew-list">
-        <!-- Populated by dashboard.js -->
         <li class="crew-item skeleton"></li>
         <li class="crew-item skeleton"></li>
         <li class="crew-item skeleton"></li>
       </ul>
     </aside>
 
-    <!-- Main panel: selected crew member -->
     <main class="main-panel">
 
-      <!-- Empty state shown before a crew member is selected -->
       <div id="empty-state" class="empty-state">
         <div class="empty-icon">✦</div>
         <p>Select a crew member to view their health data.</p>
       </div>
 
-      <!-- Crew detail — hidden until selection -->
       <div id="crew-detail" class="crew-detail hidden">
 
         <!-- Section 1: Header -->
@@ -66,73 +72,86 @@
           </div>
         </div>
 
+        <!-- Disaster mode banner -->
+        <div class="disaster-banner hidden" id="disaster-banner">
+          ⚠ DISASTER MODE — Showing critical vitals only
+        </div>
+
         <!-- Section 2: Vitals cards -->
         <section class="vitals-section">
           <h2 class="section-heading">Current Vitals</h2>
           <div class="vitals-grid">
 
-            <div class="vital-card" id="card-heart_rate">
+            <div class="vital-card" id="card-heart_rate" data-vital="heart_rate">
               <span class="vital-icon">♥</span>
               <span class="vital-value" id="val-heart_rate">—</span>
               <span class="vital-unit">bpm</span>
               <span class="vital-label">Heart Rate</span>
+              <span class="vital-status" id="status-heart_rate">—</span>
             </div>
 
-            <div class="vital-card" id="card-spo2">
+            <div class="vital-card" id="card-spo2" data-vital="spo2">
               <span class="vital-icon">◉</span>
               <span class="vital-value" id="val-spo2">—</span>
               <span class="vital-unit">%</span>
               <span class="vital-label">SpO₂</span>
+              <span class="vital-status" id="status-spo2">—</span>
             </div>
 
-            <div class="vital-card" id="card-bp">
+            <div class="vital-card" id="card-bp" data-vital="bp">
               <span class="vital-icon">⬡</span>
               <span class="vital-value" id="val-bp">—</span>
               <span class="vital-unit">mmHg</span>
               <span class="vital-label">Blood Pressure</span>
+              <span class="vital-status" id="status-bp">—</span>
             </div>
 
-            <div class="vital-card" id="card-body_temp">
+            <div class="vital-card" id="card-body_temp" data-vital="body_temp">
               <span class="vital-icon">◈</span>
               <span class="vital-value" id="val-body_temp">—</span>
               <span class="vital-unit">°C</span>
               <span class="vital-label">Body Temp</span>
+              <span class="vital-status" id="status-body_temp">—</span>
             </div>
 
-            <div class="vital-card" id="card-respiration_rate">
+            <div class="vital-card" id="card-respiration_rate" data-vital="respiration_rate">
               <span class="vital-icon">≋</span>
               <span class="vital-value" id="val-respiration_rate">—</span>
               <span class="vital-unit">br/min</span>
               <span class="vital-label">Respiration</span>
+              <span class="vital-status" id="status-respiration_rate">—</span>
             </div>
 
-            <div class="vital-card" id="card-radiation_dose">
+            <div class="vital-card" id="card-radiation_dose" data-vital="radiation_dose">
               <span class="vital-icon">⚡</span>
               <span class="vital-value" id="val-radiation_dose">—</span>
               <span class="vital-unit">mSv</span>
               <span class="vital-label">Radiation</span>
+              <span class="vital-status" id="status-radiation_dose">—</span>
             </div>
 
-            <div class="vital-card" id="card-sleep_hours">
+            <div class="vital-card" id="card-sleep_hours" data-vital="sleep_hours">
               <span class="vital-icon">◑</span>
               <span class="vital-value" id="val-sleep_hours">—</span>
               <span class="vital-unit">hrs</span>
               <span class="vital-label">Sleep</span>
+              <span class="vital-status" id="status-sleep_hours">—</span>
             </div>
 
-            <div class="vital-card" id="card-mood">
+            <div class="vital-card" id="card-mood" data-vital="mood">
               <span class="vital-icon">☺</span>
               <span class="vital-value" id="val-mood">—</span>
               <span class="vital-unit">/ 5</span>
               <span class="vital-label">Mood</span>
+              <span class="vital-status" id="status-mood">—</span>
             </div>
 
           </div>
         </section>
 
-        <!-- Section 3: Charts -->
+        <!-- Section 3: Charts (hidden in disaster + simple mode) -->
         <section class="charts-section">
-          <h2 class="section-heading">Trends <span class="section-sub">Last 20 readings</span></h2>
+          <h2 class="section-heading">Trends <span class="section-sub">Last 60 readings</span></h2>
           <div class="charts-grid">
             <div class="chart-card">
               <div class="chart-title">Heart Rate (bpm)</div>
@@ -158,17 +177,16 @@
           <h2 class="section-heading">
             Active Alerts
             <span id="alert-count-badge" class="alert-count-badge hidden">0</span>
+            <button id="export-btn" class="btn-export">Export Report</button>
           </h2>
           <div id="no-alerts" class="no-alerts">
             <span class="no-alerts-icon">✓</span>
             All vitals within normal range.
           </div>
-          <ul id="alert-list" class="alert-list">
-            <!-- Populated by dashboard.js -->
-          </ul>
+          <ul id="alert-list" class="alert-list"></ul>
         </section>
 
-        <!-- Section 5: Self-assessment form -->
+        <!-- Section 5: Self-assessment form (hidden in simple + disaster mode) -->
         <section class="form-section">
           <h2 class="section-heading">Log a Reading <span class="section-sub">Manual entry</span></h2>
           <form id="reading-form" class="reading-form" autocomplete="off">
@@ -224,8 +242,26 @@
     </main>
   </div><!-- /layout -->
 
+  <!-- ── Symptom checker modal ─────────────────────────────────── -->
+  <div id="symptom-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal">
+      <button class="modal-close" id="modal-close" aria-label="Close">×</button>
+      <div id="symptom-content"><!-- Populated by dashboard.js --></div>
+    </div>
+  </div>
+
+  <!-- ── Print report (screen-hidden, print-visible) ───────────── -->
+  <div id="print-report">
+    <div id="print-content"><!-- Populated by dashboard.js before print --></div>
+  </div>
+
   <!-- Chart.js from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="dashboard.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

@@ -657,3 +657,447 @@ html, body {
 
   .detail-header { flex-wrap: wrap; gap: 16px; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   TASKS 23–27: Environment mode, Simple view, Symptom checker,
+   Offline badge, Export button, Print CSS
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Topbar controls (new buttons) ──────────────────────────── */
+.topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-topbar {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 5px 11px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.btn-topbar:hover         { background: var(--border); color: var(--text); }
+.btn-topbar.active        { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+/* ── Mode switcher ───────────────────────────────────────────── */
+.mode-switcher {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.mode-btn {
+  background: var(--surface2);
+  border: none;
+  border-right: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.mode-btn:last-child { border-right: none; }
+.mode-btn:hover      { background: var(--border); color: var(--text); }
+.mode-btn.active     { background: var(--blue); color: #fff; }
+
+/* ── Offline badge ───────────────────────────────────────────── */
+.offline-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--yellow);
+  background: var(--yellow-dim);
+  padding: 3px 8px;
+  border-radius: 10px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ── Disaster mode banner ────────────────────────────────────── */
+.disaster-banner {
+  background: rgba(255,77,106,0.12);
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+}
+
+/* ── Environment-aware vital card visibility ─────────────────── */
+
+/* Village mode: radiation is not relevant */
+#crew-detail[data-env="village"] [data-vital="radiation_dose"] {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Disaster mode: show only 3 critical vitals, hide the rest */
+#crew-detail[data-env="disaster"] [data-vital="body_temp"],
+#crew-detail[data-env="disaster"] [data-vital="respiration_rate"],
+#crew-detail[data-env="disaster"] [data-vital="radiation_dose"],
+#crew-detail[data-env="disaster"] [data-vital="sleep_hours"],
+#crew-detail[data-env="disaster"] [data-vital="mood"] {
+  display: none;
+}
+#crew-detail[data-env="disaster"] [data-vital="heart_rate"],
+#crew-detail[data-env="disaster"] [data-vital="spo2"],
+#crew-detail[data-env="disaster"] [data-vital="bp"] {
+  min-height: 110px;
+}
+#crew-detail[data-env="disaster"] .vital-value { font-size: 32px; }
+#crew-detail[data-env="disaster"] .vital-unit  { font-size: 13px; padding-bottom: 4px; }
+#crew-detail[data-env="disaster"] .charts-section,
+#crew-detail[data-env="disaster"] .form-section { display: none; }
+
+/* ── Plain-language (simple) mode ───────────────────────────── */
+
+/* In simple mode the number+unit are hidden; status word is shown */
+.vital-status { display: none; }
+
+body.simple-mode .vital-value,
+body.simple-mode .vital-unit  { display: none; }
+
+body.simple-mode .vital-status {
+  display: block;
+  grid-area: 1 / 2 / 3 / 4;  /* span both rows, value+unit columns */
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  align-self: center;
+}
+
+body.simple-mode .vital-status.status-normal  { color: var(--green); }
+body.simple-mode .vital-status.status-watch   { color: var(--blue); }
+body.simple-mode .vital-status.status-concern { color: var(--yellow); }
+body.simple-mode .vital-status.status-critical{ color: var(--red); }
+
+/* Simple mode: hide charts and manual form (keep alerts visible) */
+body.simple-mode .charts-section,
+body.simple-mode .form-section { display: none; }
+
+/* Simple mode: bigger alert text */
+body.simple-mode .alert-message { font-size: 15px; font-weight: 500; }
+
+/* ── Export button ───────────────────────────────────────────── */
+.btn-export {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-export:hover { border-color: var(--text-muted); color: var(--text); }
+
+/* ── Symptom checker modal ───────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+.modal-close:hover { color: var(--text); background: var(--surface2); }
+
+.symptom-step-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.symptom-progress {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.symptom-progress-dot {
+  height: 3px;
+  flex: 1;
+  background: var(--border);
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+.symptom-progress-dot.done    { background: var(--green); }
+.symptom-progress-dot.current { background: var(--blue); }
+
+.symptom-question {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.4;
+  margin-bottom: 24px;
+}
+
+.symptom-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.symptom-option {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 15px;
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+}
+.symptom-option:hover { border-color: var(--blue); background: rgba(75,142,255,0.08); }
+
+/* Symptom result screen */
+.symptom-result {
+  text-align: center;
+  padding: 8px 0 16px;
+}
+
+.result-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.result-level {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.result-level.green  { color: var(--green); }
+.result-level.yellow { color: var(--yellow); }
+.result-level.red    { color: var(--red); }
+
+.result-message {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.result-guidance {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: left;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.result-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-result-primary {
+  background: var(--blue);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-result-primary:hover { opacity: 0.85; }
+
+.btn-result-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-result-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+
+/* ── Print report (screen hidden, print visible) ─────────────── */
+#print-report {
+  display: none;
+}
+
+/* ── @media print ────────────────────────────────────────────── */
+@media print {
+  /* Hide everything except the print report */
+  body > *:not(#print-report) { display: none !important; }
+
+  #print-report {
+    display: block;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 12px;
+    color: #000;
+    padding: 20px;
+  }
+
+  .pr-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #000;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+
+  .pr-title { font-size: 20px; font-weight: 700; }
+  .pr-sub   { font-size: 11px; color: #555; margin-top: 3px; }
+  .pr-date  { font-size: 11px; color: #555; text-align: right; }
+
+  .pr-section-heading {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #555;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 4px;
+    margin: 20px 0 10px;
+  }
+
+  .pr-vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .pr-vital {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 10px;
+  }
+
+  .pr-vital-value { font-size: 18px; font-weight: 700; }
+  .pr-vital-label { font-size: 10px; color: #666; margin-top: 2px; }
+
+  .pr-risk-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .pr-risk-score {
+    font-size: 28px;
+    font-weight: 800;
+  }
+
+  .pr-risk-level {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 10px;
+  }
+  .pr-risk-level.green  { background: #d4f4e5; color: #0a6b3c; }
+  .pr-risk-level.yellow { background: #fef4cc; color: #7a5500; }
+  .pr-risk-level.red    { background: #fddde1; color: #8b0000; }
+
+  .pr-alert {
+    border-left: 3px solid #999;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    background: #f9f9f9;
+  }
+  .pr-alert.high   { border-left-color: #c0392b; }
+  .pr-alert.medium { border-left-color: #e67e22; }
+  .pr-alert.low    { border-left-color: #2980b9; }
+
+  .pr-alert-title   { font-weight: 700; font-size: 12px; margin-bottom: 3px; }
+  .pr-alert-message { font-size: 11px; margin-bottom: 3px; }
+  .pr-alert-guidance{ font-size: 10px; color: #555; }
+
+  .pr-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+
+  .pr-history-table th {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 4px 6px;
+    text-align: right;
+    font-weight: 700;
+  }
+  .pr-history-table th:first-child { text-align: left; }
+
+  .pr-history-table td {
+    border: 1px solid #ddd;
+    padding: 3px 6px;
+    text-align: right;
+  }
+  .pr-history-table td:first-child { text-align: left; font-size: 9px; }
+
+  .pr-footer {
+    margin-top: 24px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    font-size: 10px;
+    color: #888;
+    display: flex;
+    justify-content: space-between;
+  }
+}
