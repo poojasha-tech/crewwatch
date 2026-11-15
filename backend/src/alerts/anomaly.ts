@@ -91,13 +91,22 @@ const GUIDANCE: Record<string, { high: string; low: string }> = {
   },
 };
 
+// Appended to every alert's guidance text so the escalation step
+// names the right support contact for each environment.
+function escalation(environment: string): string {
+  return environment === 'space'
+    ? ' If condition does not improve or you feel worse, contact mission control or the flight surgeon immediately.'
+    : ' If condition does not improve or you feel worse, seek the nearest clinic or call emergency services immediately.';
+}
+
 interface ExistingAlert {
   id: number;
 }
 
 export async function checkAnomaly(
   crewId: number,
-  vitals: VitalsPayload
+  vitals: VitalsPayload,
+  environment = 'space'
 ): Promise<void> {
   const vitalsToCheck = Object.keys(MESSAGES) as (keyof VitalsPayload)[];
 
@@ -162,7 +171,8 @@ export async function checkAnomaly(
     // New alert — insert it
     const direction = z > 0 ? 'high' : 'low';
     const message  = MESSAGES[vitalName as string]?.[direction] ?? 'Vital sign is outside your personal normal range.';
-    const guidance = GUIDANCE[vitalName as string]?.[direction] ?? 'Rest and re-check in 10 minutes. Contact medical support if symptoms develop.';
+    const baseGuidance = GUIDANCE[vitalName as string]?.[direction] ?? 'Rest and re-check in 10 minutes.';
+    const guidance = baseGuidance + escalation(environment);
 
     await query(
       `INSERT INTO alerts

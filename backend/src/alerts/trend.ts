@@ -106,9 +106,16 @@ function linearSlope(values: number[]): number {
   return denominator === 0 ? 0 : numerator / denominator;
 }
 
+function escalation(environment: string): string {
+  return environment === 'space'
+    ? ' If the trend continues, contact mission control or the flight surgeon.'
+    : ' If the trend continues, seek the nearest clinic or call emergency services.';
+}
+
 export async function checkTrend(
   crewId: number,
-  vitals: VitalsPayload
+  vitals: VitalsPayload,
+  environment = 'space'
 ): Promise<void> {
   const vitalsToCheck = Object.keys(SLOPE_THRESHOLDS) as (keyof VitalsPayload)[];
 
@@ -158,8 +165,9 @@ export async function checkTrend(
     const messages  = TREND_MESSAGES[vitalName];
     const guidances = TREND_GUIDANCE[vitalName];
 
-    const message  = messages?.[direction]  ?? `${vitalName} is trending ${direction}.`;
-    const guidance = guidances?.[direction] ?? 'Monitor closely and contact medical support if the trend continues.';
+    const message      = messages?.[direction]  ?? `${vitalName} is trending ${direction}.`;
+    const baseGuidance = guidances?.[direction] ?? 'Monitor closely and re-check.';
+    const guidance     = baseGuidance + escalation(environment);
 
     // Deduplication — same logic as anomaly detector
     const existing = await query<{ id: number }>(
